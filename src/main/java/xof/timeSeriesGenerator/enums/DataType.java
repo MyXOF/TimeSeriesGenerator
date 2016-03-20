@@ -4,19 +4,19 @@ public enum DataType {
 	CPU{
 		@Override
 		public String toString(){
-			return "CpuStatistics";
+			return "Cpu";
 		}
 	},
 	MEMORY_SIZE{
 		@Override
 		public String toString(){
-			return "MemorySizeStatistics";
+			return "MemorySize";
 		}
 	},
 	MEMORY_RATIO{
 		@Override
 		public String toString(){
-			return "MemoryRatioStatistics";
+			return "MemoryRatio";
 		}
 	},
 //	NETWORK_RATIO{

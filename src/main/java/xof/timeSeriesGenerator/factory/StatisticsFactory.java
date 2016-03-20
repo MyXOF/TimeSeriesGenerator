@@ -8,12 +8,13 @@ import xof.timeSeriesGenerator.statistics.Statistics;
 public class  StatisticsFactory {
 	private static final Logger logger = LoggerFactory.getLogger(StatisticsFactory.class);
 	private final static String PACKAGE = "xof.timeSeriesGenerator.statistics.";
+	private final static String SUFFIX = "Statistics";
 	
 	public static Statistics<?> getStatistics(String className){
 		Class<Statistics<?>> statisticsClass = null;
 		Statistics<?> statistics = null;
 		try {
-			statisticsClass = (Class<Statistics<?>>) Class.forName(PACKAGE+className);
+			statisticsClass = (Class<Statistics<?>>) Class.forName(PACKAGE+className+SUFFIX);
 		} catch (ClassNotFoundException e) {
 			logger.error("StatisticsFactory : failed to get class name {}",className,e);
 		}
