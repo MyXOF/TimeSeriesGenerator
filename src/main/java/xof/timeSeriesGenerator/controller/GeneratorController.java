@@ -9,18 +9,15 @@ import java.util.concurrent.Executors;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 
-import org.jfree.data.category.DefaultCategoryDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import xof.timeSeriesGenerator.enums.DataType;
 import xof.timeSeriesGenerator.factory.StatisticsFactory;
 import xof.timeSeriesGenerator.statistics.Statistics;
-import xof.timeSeriesGenerator.utils.NoNameType;
 
 public class GeneratorController {
 	private static final Logger logger = LoggerFactory.getLogger(GeneratorController.class);
@@ -36,10 +33,8 @@ public class GeneratorController {
 	private JButton startButton;
 	private JButton stopButton;
 	private JButton emptyButton;
-//	private JPanel graphPanel;
 	private boolean isStopped;
 	private ExecutorService service;
-//	private GraphController graphController;
 
 	public GeneratorController() {
 		isStopped = true;
@@ -95,7 +90,7 @@ public class GeneratorController {
 		Statistics<?> statistics = StatisticsFactory.getStatistics(dataType.toString());
 		isStopped = false;
 		init();
-		service.execute(new collectorThread(statistics,dataType.toString()));
+		service.execute(new collectorThread(statistics));
 		
 	}
 
@@ -124,10 +119,8 @@ public class GeneratorController {
 
 	class collectorThread implements Runnable {
 		private Statistics<?> statistics;
-		private String name;
-		public collectorThread(Statistics<?> statistics,String name) {
+		public collectorThread(Statistics<?> statistics) {
 			this.statistics = statistics;
-			this.name = name;
 		}
 
 		@Override
@@ -142,7 +135,6 @@ public class GeneratorController {
 				long leftCount = count;
 				StringBuilder builder = new StringBuilder();
 				int currentIndex = 0;
-//				DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 				while (!isStopped && leftCount > 0) {
 					Object value = statistics.getStatistics();
 					long timestamp =  System.currentTimeMillis();
@@ -150,14 +142,11 @@ public class GeneratorController {
 					record.append(content);
 					builder.append(content);
 					currentIndex++;
-//					dataset.addValue(Double.parseDouble(value.toString()), name, new NoNameType<Long>(timestamp));
 					if(currentIndex > BATCH_NUM){
 						bufferedWriter.write(builder.toString());
 						bufferedWriter.flush();
 						builder.delete(0, builder.length());
 						currentIndex = 0;
-//						graphController.drawGraph(dataset);
-//						dataset = new DefaultCategoryDataset();
 					}
 					try {
 						Thread.sleep(period);
@@ -167,8 +156,6 @@ public class GeneratorController {
 					leftCount--;
 					setProcessBar(leftCount);
 				}
-//				graphController.drawGraph(dataset);
-//				dataset = new DefaultCategoryDataset();
 				if(bufferedWriter != null){
 					bufferedWriter.flush();
 					bufferedWriter.close();
@@ -227,15 +214,6 @@ public class GeneratorController {
 	public void setEmptyButton(JButton emptyButton) {
 		this.emptyButton = emptyButton;
 	}
-
-//	public JPanel getGraphPanel() {
-//		return graphPanel;
-//	}
-//
-//	public void setGraphPanel(JPanel graphPanel) {
-//		this.graphPanel = graphPanel;
-//		graphController = new GraphController(this.graphPanel);
-//	}
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub

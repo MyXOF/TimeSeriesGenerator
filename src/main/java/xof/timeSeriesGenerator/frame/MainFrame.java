@@ -170,7 +170,6 @@ public class MainFrame extends JFrame {
 		controller.setStartButton(startButton);
 		controller.setStopButton(stopButton);
 		controller.setEmptyButton(emptyButton);
-//		controller.setGraphPanel(graphPanel);
 	}
 
 	public void addButtonListener() {

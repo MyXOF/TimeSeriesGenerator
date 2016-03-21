@@ -6,7 +6,7 @@ public class MemoryRatioStatistics extends Statistics<Float>{
 	public Float getStatistics() {
 		long sizeFree = osmb.getFreePhysicalMemorySize();
 		long sizeAll = osmb.getTotalPhysicalMemorySize();
-		double ratio =(double) sizeFree / sizeAll * 100;
+		double ratio =((double) sizeFree / sizeAll) * 100;
 		return (float) ratio;
 	}
 
