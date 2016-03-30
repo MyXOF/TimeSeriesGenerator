@@ -19,10 +19,10 @@ public enum DataType {
 			return "MemoryRatio";
 		}
 	},
-//	NETWORK_RATIO{
-//		@Override
-//		public String toString(){
-//			return "NetworkStatistics";
-//		}
-//	};
+	ALL{
+		@Override
+		public String toString(){
+			return "All";
+		}
+	};
 }
