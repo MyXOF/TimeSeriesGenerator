@@ -17,6 +17,9 @@ import org.slf4j.LoggerFactory;
 
 import xof.timeSeriesGenerator.enums.DataType;
 import xof.timeSeriesGenerator.factory.StatisticsFactory;
+import xof.timeSeriesGenerator.statistics.CpuStatistics;
+import xof.timeSeriesGenerator.statistics.MemoryRatioStatistics;
+import xof.timeSeriesGenerator.statistics.MemorySizeStatistics;
 import xof.timeSeriesGenerator.statistics.Statistics;
 
 public class GeneratorController {
@@ -90,7 +93,7 @@ public class GeneratorController {
 		Statistics<?> statistics = StatisticsFactory.getStatistics(dataType.toString());
 		isStopped = false;
 		init();
-		service.execute(new collectorThread(statistics));
+		service.execute(new CollectorSimpleThread(statistics));
 		
 	}
 
@@ -117,9 +120,9 @@ public class GeneratorController {
 		return true;
 	}
 
-	class collectorThread implements Runnable {
+	class CollectorSimpleThread implements Runnable {
 		private Statistics<?> statistics;
-		public collectorThread(Statistics<?> statistics) {
+		public CollectorSimpleThread(Statistics<?> statistics) {
 			this.statistics = statistics;
 		}
 
@@ -157,6 +160,7 @@ public class GeneratorController {
 					setProcessBar(leftCount);
 				}
 				if(bufferedWriter != null){
+					bufferedWriter.write(builder.toString());
 					bufferedWriter.flush();
 					bufferedWriter.close();
 				}
@@ -166,15 +170,15 @@ public class GeneratorController {
 				end();
 			}
 		}
-
-		private void setProcessBar(long leftCount) {
-			double ratio = (double) leftCount / count;
-			int value = (int) ((1 - ratio) * 100);
-			progressBar.setValue(value);
-		}
-
 	}
-
+	
+	private void setProcessBar(long leftCount) {
+		double ratio = (double) leftCount / count;
+		int value = (int) ((1 - ratio) * 100);
+		progressBar.setValue(value);
+	}	
+	
+	
 	public JProgressBar getProgressBar() {
 		return progressBar;
 	}
