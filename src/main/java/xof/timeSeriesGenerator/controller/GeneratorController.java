@@ -17,9 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import xof.timeSeriesGenerator.enums.DataType;
 import xof.timeSeriesGenerator.factory.StatisticsFactory;
-import xof.timeSeriesGenerator.statistics.CpuStatistics;
-import xof.timeSeriesGenerator.statistics.MemoryRatioStatistics;
-import xof.timeSeriesGenerator.statistics.MemorySizeStatistics;
 import xof.timeSeriesGenerator.statistics.Statistics;
 
 public class GeneratorController {

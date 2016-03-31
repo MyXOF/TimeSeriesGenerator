@@ -5,7 +5,6 @@ public class AllStatistics extends Statistics<String>{
 	private MemoryRatioStatistics mr;
 	private MemorySizeStatistics ms;
 	
-	
 	@Override
 	public String getStatistics() {
 		cpu = new CpuStatistics();
@@ -18,6 +17,4 @@ public class AllStatistics extends Statistics<String>{
 		
 		return String.format("%f,%f,%d", cpuLoad,memRatio,memSize);
 	}
-
-
 }

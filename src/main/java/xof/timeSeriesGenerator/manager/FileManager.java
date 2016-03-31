@@ -2,7 +2,6 @@ package xof.timeSeriesGenerator.manager;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -10,69 +9,128 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class FileManager {
-	private static final Logger logger = LoggerFactory.getLogger(FileManager.class);
-	private String intputFile;
 	private String outputFile;
-	private String deviceID;
-	private String sensorID;
-	private List<String> valueList;
-
-	public FileManager(String inputFile,String outputFile,String deviceID,String sensorID){
-		this.intputFile = inputFile;
+	
+	public FileManager(String outputFile){
 		this.outputFile = outputFile;
-		this.deviceID = deviceID;
-		this.sensorID = sensorID;
-		valueList = new ArrayList<String>();
 	}
 	
-	private boolean init() throws IOException{
-		File source = new File(intputFile);
-		if(!source.exists()){
-			logger.error("FileManager: cannot read source file");
-			return false;
-		}
-		BufferedReader reader = new BufferedReader(new FileReader(source));
-		String record = null;
-		while((record = reader.readLine() )!= null) {
-			String[] values = record.trim().split(",");
-			valueList.add(values[3]);
-		}
-		reader.close();	
-		return true;
-	}
-	
-	public void service(int frequence,int count,int maxRepeatCount) throws IOException{
-		if(!init()){
-			return;
-		}
-		int baseCount = valueList.size() > maxRepeatCount ? maxRepeatCount : valueList.size();
-		int index = 0;
+	public void createLargeFile(String device,int frequence, int count, List<FileInfo> infoList) throws IOException{
 		BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(outputFile));
-		
 		Random random = new Random(System.currentTimeMillis());
+		int index = 0;
 		int offsetbase = frequence / 10 * 2;
 		int offsetRange = offsetbase * 2;
 		long timestamp = System.currentTimeMillis();
+		final int BASE_FREQ = 50;
+		
 		while(count > 0){
 			int offset = random.nextInt(offsetRange);
 			timestamp = timestamp + frequence - offsetbase + offset;
-			String record = String.format("%s,%s,%d,%s\n", deviceID,sensorID,timestamp,valueList.get(index));
-			index = (index + 1) % baseCount;
-			bufferedWriter.write(record);
+
+			StringBuilder builder = new StringBuilder();
+			builder.append(device);
+			builder.append(",");
+			builder.append(timestamp);
+			
+			for(FileInfo info : infoList){
+				if(info.frequency == 50){
+					builder.append(",");
+					builder.append(createSensorValuePair(info.sensorID, info.getNext()));
+				}
+				else if((info.frequency == 10) && (index % 10 == 0)){
+					builder.append(",");
+					builder.append(createSensorValuePair(info.sensorID, info.getNext()));
+				}
+				else if((info.frequency == 1) && (index % 50 == 0)){
+					builder.append(",");
+					builder.append(createSensorValuePair(info.sensorID, info.getNext()));
+				}else{
+					builder.append(",");
+					builder.append(createSensorValuePair(info.sensorID, ""));
+				}
+			}
+			builder.append("\n");
+			index = (index + 1) % BASE_FREQ;
+			bufferedWriter.write(builder.toString());
 			bufferedWriter.flush();
 			count--;
 		}
 		bufferedWriter.close();
+	}
+	
+	private String createSensorValuePair(String sensor,String value){
+		return String.format("%s,%s",sensor,value);
+	}
+	
+	public FileInfo collectFileInfo(String filePath,int frequency,String sensorID,boolean isfloat) throws IOException{
+		FileInfo info = new FileInfo(filePath, frequency, sensorID);
 		
+		BufferedReader reader = new BufferedReader(new FileReader(filePath));
+		String record = null;
+		while((record = reader.readLine()) != null){
+			String[] values = record.trim().split(",");
+			if(isfloat){
+				int value = (int) (Float.parseFloat(values[3]) * 10000);
+				info.addValue(String.valueOf(value));
+			}
+			else{
+				info.addValue(values[3]);
+			}
+		}
+		reader.close();
+		info.setSize();
+		return info;
 	}
 	
 	public static void main(String[] args) throws IOException {
-		FileManager app = new FileManager("cpu_output_50Hz", "cpu_dest_50Hz", "device_cpu_1", "sensor_xuyi_1");
-		app.service(20, 1000,100);
+		long start = System.currentTimeMillis();
+		FileManager manager = new FileManager("data/output_final_small.csv");
+		List<FileInfo> infoList = new ArrayList<FileManager.FileInfo>();
+		infoList.add(manager.collectFileInfo("data/cpu_output_50Hz", 50, "sensor_cpu_50", true));
+		infoList.add(manager.collectFileInfo("data/cpu_output_10Hz", 10, "sensor_cpu_10", true));
+		infoList.add(manager.collectFileInfo("data/cpu_output_kr_1Hz", 1, "sensor_cpu_1", true));
+		infoList.add(manager.collectFileInfo("data/mr_output_10Hz", 10, "sensor_mr_10", true));
+		infoList.add(manager.collectFileInfo("data/ms_output_50Hz_0", 50, "sensor_ms_50", false));
 		
+		manager.createLargeFile("device_1", 20, 100, infoList);
+		
+		long end = System.currentTimeMillis() - start;
+		System.out.println("It costs "+end+" ms");
+	}
+	
+	class FileInfo{
+		public String filePath;
+		public int frequency;
+		public String sensorID;
+		public List<String> values;
+		private int index;
+		private int size;
+		
+		public FileInfo(String filePath,int frequency,String sensorID){
+			this.filePath = filePath;
+			this.frequency = frequency;
+			this.sensorID = sensorID;
+			this.values = new ArrayList<String>();
+			index = 0;
+		}
+		
+		public void addValue(String value){
+			if(values == null){
+				values = new ArrayList<String>();
+			}
+			values.add(value);
+		}
+		
+		public void setSize(){
+			size = values.size();
+		}
+		
+		public String getNext(){
+			String result = values.get(index);
+			index = (index + 1) % size;
+			return result;
+		}
 	}
 }
