@@ -19,6 +19,12 @@ public enum DataType {
 			return "MemoryRatio";
 		}
 	},
+	DISK_FREE{
+		@Override
+		public String toString(){
+			return "DiskFreeSize";
+		}
+	},
 	ALL{
 		@Override
 		public String toString(){
