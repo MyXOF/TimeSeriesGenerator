@@ -64,7 +64,7 @@ public class FileManager {
 		return String.format("%s,%s",sensor,value);
 	}
 	
-	public FileInfo collectFileInfo(String filePath,int frequency,String sensorID,boolean isfloat) throws IOException{
+	public FileInfo collectFileInfo(String filePath,int frequency,String sensorID,boolean isfloat,boolean isM) throws IOException{
 		FileInfo info = new FileInfo(filePath, frequency, sensorID);
 		
 		BufferedReader reader = new BufferedReader(new FileReader(filePath));
@@ -73,6 +73,9 @@ public class FileManager {
 			String[] values = record.trim().split(",");
 			if(isfloat){
 				int value = (int) (Float.parseFloat(values[3]));
+				info.addValue(String.valueOf(value));
+			}else if(isM){
+				int value = Integer.parseInt(values[3]) / 1024;
 				info.addValue(String.valueOf(value));
 			}
 			else{
@@ -86,24 +89,24 @@ public class FileManager {
 	
 	public static void main(String[] args) throws IOException {
 		long start = System.currentTimeMillis();
-		FileManager manager = new FileManager("data2/output_final_big.csv");
-//		List<FileInfo> infoList = new ArrayList<FileManager.FileInfo>();
-//		infoList.add(manager.collectFileInfo("data/cpu_output_50Hz", 50, "sensor_cpu_50", true));
-//		infoList.add(manager.collectFileInfo("data/cpu_output_10Hz", 10, "sensor_cpu_10", true));
-//		infoList.add(manager.collectFileInfo("data/cpu_output_kr_1Hz", 1, "sensor_cpu_1", true));
-//		infoList.add(manager.collectFileInfo("data/mr_output_10Hz", 10, "sensor_mr_10", true));
-//		infoList.add(manager.collectFileInfo("data/ms_output_50Hz_0", 50, "sensor_ms_50", false));
-//		infoList.add(manager.collectFileInfo("data/disk_output_50Hz", 50, "sensor_df_50", false));
-//		manager.createLargeFile("device_1", 20, 10000000, infoList);
-		
+		FileManager manager = new FileManager("data/output_final_big.csv");
 		List<FileInfo> infoList = new ArrayList<FileManager.FileInfo>();
-		infoList.add(manager.collectFileInfo("data2/cpu_output_50Hz", 50, "sensor_cpu_50", true));
-		infoList.add(manager.collectFileInfo("data2/cpu_output_10Hz", 10, "sensor_cpu_10", true));
-		infoList.add(manager.collectFileInfo("data2/cpu_output_kr_1Hz", 1, "sensor_cpu_1", true));
-		infoList.add(manager.collectFileInfo("data2/mr_output_10Hz", 10, "sensor_mr_10", true));
-		infoList.add(manager.collectFileInfo("data2/ms_output_50Hz_0", 50, "sensor_ms_50", false));
-		infoList.add(manager.collectFileInfo("data2/disk_output_50Hz", 50, "sensor_df_50", false));
-		manager.createLargeFile("device_2", 20, 10000000, infoList);
+		infoList.add(manager.collectFileInfo("data/cpu_output_50Hz", 50, "sensor_cpu_50", true,false));
+		infoList.add(manager.collectFileInfo("data/cpu_output_10Hz", 10, "sensor_cpu_10", true,false));
+		infoList.add(manager.collectFileInfo("data/cpu_output_kr_1Hz", 1, "sensor_cpu_1", true,false));
+		infoList.add(manager.collectFileInfo("data/mr_output_10Hz", 10, "sensor_mr_10", true,false));
+		infoList.add(manager.collectFileInfo("data/ms_output_50Hz_0", 50, "sensor_ms_50", false,false));
+//		infoList.add(manager.collectFileInfo("data/disk_output_50Hz", 50, "sensor_df_50", false,true));
+		manager.createLargeFile("device_1", 20, 2000000, infoList);
+		
+//		List<FileInfo> infoList = new ArrayList<FileManager.FileInfo>();
+//		infoList.add(manager.collectFileInfo("data2/cpu_output_50Hz", 50, "sensor_cpu_50", true));
+//		infoList.add(manager.collectFileInfo("data2/cpu_output_10Hz", 10, "sensor_cpu_10", true));
+//		infoList.add(manager.collectFileInfo("data2/cpu_output_kr_1Hz", 1, "sensor_cpu_1", true));
+//		infoList.add(manager.collectFileInfo("data2/mr_output_10Hz", 10, "sensor_mr_10", true));
+////		infoList.add(manager.collectFileInfo("data2/ms_output_50Hz_0", 50, "sensor_ms_50", false));
+//		infoList.add(manager.collectFileInfo("data2/disk_output_50Hz", 50, "sensor_df_50", false,true));
+//		manager.createLargeFile("device_2", 20, 10000000, infoList);
 		
 		long end = System.currentTimeMillis() - start;
 		System.out.println("It costs "+end+" ms");

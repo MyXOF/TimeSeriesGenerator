@@ -25,6 +25,12 @@ public enum DataType {
 			return "DiskFreeSize";
 		}
 	},
+	SWITCH_VALUES{
+		@Override
+		public String toString(){
+			return "SwitchValues";
+		}		
+	},
 	ALL{
 		@Override
 		public String toString(){
